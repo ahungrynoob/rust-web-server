@@ -7,8 +7,14 @@ fn handle_client(mut stream: TcpStream) {
     stream.read(&mut buffer).unwrap();
     println!("request: {}", String::from_utf8_lossy(&buffer));
 
-    let content = fs::read_to_string("main.html").unwrap();
-    let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", content);
+    let get = b"GET / HTTP/1.1\r\n";
+
+    let (status_line, filename) = if buffer.starts_with(get) {
+        ("HTTP/1.1 200 OK\r\n\r\n", "main.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
+    };
+    let response = format!("{}{}", status_line, fs::read_to_string(filename).unwrap());
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
