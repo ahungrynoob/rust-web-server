@@ -25,7 +25,7 @@ fn main() -> std::io::Result<()> {
     let pool = ThreadPool::new(4);
 
     // accept connections and process them serially
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(4) {
         let stream = stream.unwrap();
         pool.excute(|| handle_client(stream));
     }
